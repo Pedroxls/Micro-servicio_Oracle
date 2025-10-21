@@ -1,0 +1,7 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-dotenv>=1.0
+oracledb>=2.3
+pydantic>=2.8
+openai>=1.30
+loguru>=0.7
