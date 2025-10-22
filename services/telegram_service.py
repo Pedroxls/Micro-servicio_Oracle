@@ -4,6 +4,9 @@ from fastapi import APIRouter, HTTPException, Request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 
+from services.chatbot_service import basic_context, log_chat
+from ai import chat_complete
+
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 _application: Application | None = None
 _started = False
@@ -40,7 +43,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message:
-        await update.message.reply_text(f"Recibido: {update.message.text}")
+        user_id = update.effective_user.id
+        texto_usuario = update.message.text
+
+        contexto = basic_context(usuario_id=user_id, user_email=None)
+        mensajes = [
+            {"role": "system", "content": contexto},
+            {"role": "user", "content": texto_usuario},
+        ]
+
+        respuesta = chat_complete(mensajes)
+        await update.message.reply_text(respuesta)
+        log_chat(user_id, None, texto_usuario, respuesta)
 
 
 @router.post("/webhook")
